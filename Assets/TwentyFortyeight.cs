@@ -50,19 +50,24 @@ public class TwentyFortyeight
     public void Merge(Direction direction)
     {
         bool reverse = direction == Direction.Down || direction == Direction.Right;
+        bool movement;
         if (direction == Direction.Up || direction == Direction.Down)
         {
-            MergeVertically(reverse);
+            movement = MergeVertically(reverse);
         }
         else
         {
-            MergeHorizontally(reverse);
+            movement = MergeHorizontally(reverse);
         }
-        GenerateNewNumber();
+        if (movement)
+        {
+            GenerateNewNumber();
+        }
     }
 
-    private void MergeHorizontally(bool reverse)
+    private bool MergeHorizontally(bool reverse)
     {
+        bool movement = false;
         int start = reverse ? 3 : 0;
         int interval = reverse ? -1 : 1;
 
@@ -81,6 +86,7 @@ public class TwentyFortyeight
                     //Move the value
                     RemoveFreeSpace(i, freeSpot, matrix[i, j]);
                     AddFreeSpace(i, j);
+                    movement = true;
                 }
                 //Merging
                 else if (matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
@@ -90,23 +96,27 @@ public class TwentyFortyeight
                     Score += merge;
                     freeSpot += interval;
                     AddFreeSpace(i, j);
+                    movement = true;
                 }
                 //Slide the value to the next empty cell
                 else if (matrix[i, j] != matrix[i, freeSpot])
                 {
                     freeSpot += interval;
-                    RemoveFreeSpace(i, freeSpot, matrix[i, j]);
                     if (freeSpot != j)
                     {
+                        RemoveFreeSpace(i, freeSpot, matrix[i, j]);
                         AddFreeSpace(i, j);
+                        movement = true;
                     }
                 }
             }
         }
+        return movement;
     }
 
-    private void MergeVertically(bool reverse)
+    private bool MergeVertically(bool reverse)
     {
+        bool movement = false;
         int start = reverse ? 3 : 0;
         int interval = reverse ? -1 : 1;
 
@@ -125,6 +135,7 @@ public class TwentyFortyeight
                     //Move the value
                     RemoveFreeSpace(freeSpot, j, matrix[i, j]);
                     AddFreeSpace(i, j);
+                    movement = true;
                 }
                 //Merging
                 else if (matrix[i, j] == matrix[freeSpot, j] && i != freeSpot)
@@ -134,23 +145,22 @@ public class TwentyFortyeight
                     Score += merge;
                     freeSpot += interval;
                     AddFreeSpace(i, j);
+                    movement = true;
                 }
                 //Slide the value to the next empty cell
                 else if (matrix[i, j] != matrix[freeSpot, j])
                 {
                     freeSpot += interval;
-                    RemoveFreeSpace(freeSpot, j, matrix[i, j]);
                     if (freeSpot != i)
                     {
+                        RemoveFreeSpace(freeSpot, j, matrix[i, j]);
                         AddFreeSpace(i, j);
+                        movement = true;
                     }
                 }
             }
         }
-    }
-
-    private void Merge(int i, int j, int interval, ref int freeSpot)
-    {
+        return movement;
     }
 
     private void AddFreeSpace(int i, int j)
