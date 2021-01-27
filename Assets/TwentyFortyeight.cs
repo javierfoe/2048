@@ -47,7 +47,7 @@ public class TwentyFortyeight
         matrix[xPosition, yPosition] = newNumber;
     }
 
-    public void Merge(Direction direction)
+    public bool Move(Direction direction)
     {
         bool reverse = direction == Direction.Down || direction == Direction.Right;
         bool movement;
@@ -63,6 +63,7 @@ public class TwentyFortyeight
         {
             GenerateNewNumber();
         }
+        return CheckGameOver();
     }
 
     private bool MergeHorizontally(bool reverse)
@@ -183,6 +184,31 @@ public class TwentyFortyeight
     private int From2Dto1D(int i, int j)
     {
         return i * 4 + j;
+    }
+
+    private bool CheckGameOver()
+    {
+        if (emptySquares.Count > 0) return false;
+        bool merging = false;
+        int x, y;
+        for(int i = 0; i < 15 && !merging; i++)
+        {
+            //Compare with the right value
+            merging |= Compare(i, i + 1);
+            //Compare with the bottom value
+            merging |= Compare(i, i + 4);
+        }
+        return !merging;
+    }
+
+    private bool Compare(int origin, int destination)
+    {
+        if (destination > 15 || destination % 4 == 0 && origin % 4 != 0) return false;
+        int xOri = origin / 4;
+        int yOri = origin % 4;
+        int xDest = destination / 4;
+        int yDest = destination % 4;
+        return matrix[xOri,yOri] == matrix[xDest, yDest];
     }
 
     public override string ToString()

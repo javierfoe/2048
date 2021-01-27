@@ -4,6 +4,7 @@ public class Test : MonoBehaviour
 {
 
     TwentyFortyeight game = new TwentyFortyeight();
+    bool gameOver = false;
 
     private void Start()
     {
@@ -12,25 +13,37 @@ public class Test : MonoBehaviour
 
     private void Update()
     {
+        if (gameOver) return;
+        Direction direction = Direction.Up;
+        bool move = false;
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            game.Merge(Direction.Right);
-            Debug.Log(game);
+            move = true;
+            direction = Direction.Right;
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            game.Merge(Direction.Left);
-            Debug.Log(game);
+            move = true;
+            direction = Direction.Left;
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            game.Merge(Direction.Up);
-            Debug.Log(game);
+            move = true;
+            direction = Direction.Up;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            game.Merge(Direction.Down);
+            move = true;
+            direction = Direction.Down;
+        }
+        if (move)
+        {
+            gameOver = game.Move(direction);
             Debug.Log(game);
+            if (gameOver)
+            {
+                Debug.Log("GAME OVER");
+            }
         }
     }
 
