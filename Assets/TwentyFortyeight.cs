@@ -70,45 +70,15 @@ public class TwentyFortyeight
         bool movement = false;
         int start = reverse ? 3 : 0;
         int interval = reverse ? -1 : 1;
-
         int freeSpot;
-        //Merging 4 rows
+
         for (int i = 0; i < 4; i++)
         {
             freeSpot = start;
-            //Moving individual cells
             for (int j = start; j < 4 && j > -1 && freeSpot < 4 && freeSpot > -1; j += interval)
             {
                 if (matrix[i, j] == 0) continue;
-                //Empty square to move to
-                if (matrix[i, freeSpot] == 0)
-                {
-                    //Move the value
-                    RemoveFreeSpace(i, freeSpot, matrix[i, j]);
-                    AddFreeSpace(i, j);
-                    movement = true;
-                }
-                //Merging
-                else if (matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
-                {
-                    int merge = matrix[i, freeSpot] * 2;
-                    matrix[i, freeSpot] = merge;
-                    Score += merge;
-                    freeSpot += interval;
-                    AddFreeSpace(i, j);
-                    movement = true;
-                }
-                //Slide the value to the next empty cell
-                else if (matrix[i, j] != matrix[i, freeSpot])
-                {
-                    freeSpot += interval;
-                    if (freeSpot != j)
-                    {
-                        RemoveFreeSpace(i, freeSpot, matrix[i, j]);
-                        AddFreeSpace(i, j);
-                        movement = true;
-                    }
-                }
+                movement = Merge(i, j, interval, ref freeSpot, false, movement);
             }
         }
         return movement;
@@ -119,48 +89,75 @@ public class TwentyFortyeight
         bool movement = false;
         int start = reverse ? 3 : 0;
         int interval = reverse ? -1 : 1;
-
         int freeSpot;
-        //Merging 4 rows
+
         for (int j = 0; j < 4; j++)
         {
             freeSpot = start;
-            //Moving individual cells
             for (int i = start; i < 4 && i > -1 && freeSpot < 4 && freeSpot > -1; i += interval)
             {
                 if (matrix[i, j] == 0) continue;
-                //Empty square to move to
-                if (matrix[freeSpot, j] == 0)
-                {
-                    //Move the value
-                    RemoveFreeSpace(freeSpot, j, matrix[i, j]);
-                    AddFreeSpace(i, j);
-                    movement = true;
-                }
-                //Merging
-                else if (matrix[i, j] == matrix[freeSpot, j] && i != freeSpot)
-                {
-                    int merge = matrix[freeSpot, j] * 2;
-                    matrix[freeSpot, j] = merge;
-                    Score += merge;
-                    freeSpot += interval;
-                    AddFreeSpace(i, j);
-                    movement = true;
-                }
-                //Slide the value to the next empty cell
-                else if (matrix[i, j] != matrix[freeSpot, j])
-                {
-                    freeSpot += interval;
-                    if (freeSpot != i)
-                    {
-                        RemoveFreeSpace(freeSpot, j, matrix[i, j]);
-                        AddFreeSpace(i, j);
-                        movement = true;
-                    }
-                }
+                movement = Merge(i, j, interval, ref freeSpot, true, movement);
             }
         }
         return movement;
+    }
+
+    private bool Merge(int i, int j, int interval, ref int freeSpot, bool vertical, bool movement)
+    {
+        bool newMovement = false;
+        //Empty square to move to
+        if (vertical && matrix[freeSpot, j] == 0 || !vertical && matrix[i, freeSpot] == 0)
+        {
+            //Move the value
+            if (vertical)
+            {
+                RemoveFreeSpace(freeSpot, j, matrix[i, j]);
+            }
+            else
+            {
+                RemoveFreeSpace(i, freeSpot, matrix[i, j]);
+            }
+            AddFreeSpace(i, j);
+            newMovement = true;
+        }
+        //Merging
+        else if (vertical && matrix[i, j] == matrix[freeSpot, j] && i != freeSpot || !vertical && matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
+        {
+            int merge = 2 * (vertical ? matrix[freeSpot, j] : matrix[i, freeSpot]);
+            if (vertical)
+            {
+                matrix[freeSpot, j] = merge;
+            }
+            else
+            {
+                matrix[i, freeSpot] = merge;
+            }
+            Score += merge;
+            freeSpot += interval;
+            AddFreeSpace(i, j);
+            newMovement = true;
+        }
+        //Slide the value to the next empty cell
+        else if (vertical && matrix[i, j] != matrix[freeSpot, j] || !vertical && matrix[i, j] != matrix[i, freeSpot])
+        {
+            freeSpot += interval;
+            if (vertical && freeSpot != i)
+            {
+                RemoveFreeSpace(freeSpot, j, matrix[i, j]);
+                newMovement = true;
+            }
+            else if(!vertical && freeSpot != j)
+            {
+                RemoveFreeSpace(i, freeSpot, matrix[i, j]);
+                newMovement = true;
+            }
+            if (newMovement)
+            {
+                AddFreeSpace(i, j);
+            }
+        }
+        return newMovement || movement;
     }
 
     private void AddFreeSpace(int i, int j)
