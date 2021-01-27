@@ -190,7 +190,6 @@ public class TwentyFortyeight
     {
         if (emptySquares.Count > 0) return false;
         bool merging = false;
-        int x, y;
         for(int i = 0; i < 15 && !merging; i++)
         {
             //Compare with the right value
