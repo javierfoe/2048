@@ -29,6 +29,16 @@ public class TwentyFortyeight
         GenerateNewNumber();
     }
 
+    public int[] GetValues()
+    {
+        int[] values = new int[16];
+        for(int i = 0; i < 16; i++)
+        {
+            values[i] = matrix[i / 4, i % 4];
+        }
+        return values;
+    }
+
     public void GenerateNewNumber()
     {
         int twoOrFour = random.Next(0, 10);
