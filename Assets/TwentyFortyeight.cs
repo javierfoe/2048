@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 public enum Direction
 {
@@ -11,13 +12,34 @@ public enum Direction
 
 public class TwentyFortyeight
 {
+    private readonly static Random random = new Random();
 
     public int Score { get; private set; }
-    public int this[int i, int j] => matrix[i, j];
+
+    //1st int -> int generated, 2nd int -> destination
+    private readonly UnityEvent<int, int> numberGenerator = new UnityEventIntInt();
+    //1st int -> origin, 2nd int -> destination
+    private readonly UnityEvent<int, int> moveNumber = new UnityEventIntInt();
+    //1st int -> origin, 2nd int -> destination
+    private readonly UnityEvent<int, int> mergeNumber = new UnityEventIntInt();
 
     private readonly int[,] matrix = new int[4, 4];
     private readonly List<int> emptySquares = new List<int>();
-    private readonly static Random random = new Random();
+
+    public void AddNumberGeneratorListener(UnityAction<int, int> action)
+    {
+        numberGenerator.AddListener(action);
+    }
+
+    public void AddMoveNumberListener(UnityAction<int, int> action)
+    {
+        moveNumber.AddListener(action);
+    }
+
+    public void AddMergeNumberListener(UnityAction<int, int> action)
+    {
+        mergeNumber.AddListener(action);
+    }
 
     public TwentyFortyeight()
     {
@@ -27,16 +49,6 @@ public class TwentyFortyeight
         }
         GenerateNewNumber();
         GenerateNewNumber();
-    }
-
-    public int[] GetValues()
-    {
-        int[] values = new int[16];
-        for(int i = 0; i < 16; i++)
-        {
-            values[i] = matrix[i / 4, i % 4];
-        }
-        return values;
     }
 
     public void GenerateNewNumber()
@@ -55,6 +67,8 @@ public class TwentyFortyeight
         emptySquares.RemoveAt(randomPosition);
 
         matrix[xPosition, yPosition] = newNumber;
+
+        numberGenerator.Invoke(newNumber, xPosition * 4 + yPosition);
     }
 
     public bool Move(Direction direction)
@@ -117,6 +131,8 @@ public class TwentyFortyeight
     private bool Merge(int i, int j, int interval, ref int freeSpot, bool vertical, bool movement)
     {
         bool newMovement = false;
+        int destination = vertical ? freeSpot * 4 + j : i * 4 + freeSpot;
+        int origin = i * 4 + j;
         //Empty square to move to
         if (vertical && matrix[freeSpot, j] == 0 || !vertical && matrix[i, freeSpot] == 0)
         {
@@ -131,6 +147,7 @@ public class TwentyFortyeight
             }
             AddFreeSpace(i, j);
             newMovement = true;
+            moveNumber.Invoke(origin, destination);
         }
         //Merging
         else if (vertical && matrix[i, j] == matrix[freeSpot, j] && i != freeSpot || !vertical && matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
@@ -148,6 +165,7 @@ public class TwentyFortyeight
             freeSpot += interval;
             AddFreeSpace(i, j);
             newMovement = true;
+            mergeNumber.Invoke(origin, destination);
         }
         //Slide the value to the next empty cell
         else if (vertical && matrix[i, j] != matrix[freeSpot, j] || !vertical && matrix[i, j] != matrix[i, freeSpot])
@@ -158,13 +176,15 @@ public class TwentyFortyeight
                 RemoveFreeSpace(freeSpot, j, matrix[i, j]);
                 newMovement = true;
             }
-            else if(!vertical && freeSpot != j)
+            else if (!vertical && freeSpot != j)
             {
                 RemoveFreeSpace(i, freeSpot, matrix[i, j]);
                 newMovement = true;
             }
             if (newMovement)
             {
+                destination += interval * (vertical ? 4 : 1);
+                moveNumber.Invoke(origin, destination);
                 AddFreeSpace(i, j);
             }
         }
@@ -200,7 +220,7 @@ public class TwentyFortyeight
     {
         if (emptySquares.Count > 0) return false;
         bool merging = false;
-        for(int i = 0; i < 15 && !merging; i++)
+        for (int i = 0; i < 15 && !merging; i++)
         {
             //Compare with the right value
             merging |= Compare(i, i + 1);
@@ -217,7 +237,7 @@ public class TwentyFortyeight
         int yOri = origin % 4;
         int xDest = destination / 4;
         int yDest = destination % 4;
-        return matrix[xOri,yOri] == matrix[xDest, yDest];
+        return matrix[xOri, yOri] == matrix[xDest, yDest];
     }
 
     public override string ToString()
@@ -233,5 +253,7 @@ public class TwentyFortyeight
         }
         return result;
     }
+
+    private class UnityEventIntInt : UnityEvent<int, int> { }
 
 }

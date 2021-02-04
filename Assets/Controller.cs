@@ -4,11 +4,6 @@
 
     public static int Score => game.Score;
 
-    public static int[] GetValues()
-    {
-        return game.GetValues();
-    }
-
     public static void Restart()
     {
         game = new TwentyFortyeight();
