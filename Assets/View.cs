@@ -30,7 +30,7 @@ public class View : MonoBehaviour
     {
         squares = GetComponentsInChildren<Text>();
 #if !UNITY_EDITOR
-        dragDistance = Screen.height * 15 / 100; //dragDistance is 15% height of the screen
+        dragDistance = Screen.width * 10 / 100;
 #endif
         Controller.Restart();
         UpdateValues();
