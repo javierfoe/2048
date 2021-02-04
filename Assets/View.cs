@@ -5,7 +5,7 @@ using UnityEngine.Events;
 public class View : MonoBehaviour
 {
     private Text[] squares;
-#if !UNITY_EDITOR
+#if UNITY_ANDROID
     private Vector3 fp;   //First touch position
     private Vector3 lp;   //Last touch position
     private float dragDistance;  //minimum distance for a swipe to be registered
@@ -14,31 +14,20 @@ public class View : MonoBehaviour
     public void Slide(Direction direction)
     {
         Controller.Slide(direction);
-        UpdateValues();
-    }
-
-    private void UpdateValues()
-    {
-        int[] values = Controller.GetValues();
-        for (int i = 0; i < values.Length; i++)
-        {
-            squares[i].text = values[i].ToString();
-        }
     }
 
     private void Start()
     {
         squares = GetComponentsInChildren<Text>();
-#if !UNITY_EDITOR
+#if UNITY_ANDROID
         dragDistance = Screen.width * 10 / 100;
 #endif
         Controller.Restart();
-        UpdateValues();
     }
 
     private void Update()
     {
-#if UNITY_EDITOR
+#if !UNITY_ANDROID
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             Slide(Direction.Right);
