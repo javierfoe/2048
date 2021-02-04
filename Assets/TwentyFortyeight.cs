@@ -47,28 +47,12 @@ public class TwentyFortyeight
         {
             emptySquares.Add(i);
         }
-        GenerateNewNumber();
-        GenerateNewNumber();
     }
 
-    public void GenerateNewNumber()
+    public void StartingNumbers()
     {
-        int twoOrFour = random.Next(0, 10);
-        int newNumber = 4;
-        //90% => 2, 10% => 4
-        if (twoOrFour > 0)
-        {
-            newNumber = 2;
-        }
-        int randomPosition = random.Next(0, emptySquares.Count);
-        int position = emptySquares[randomPosition];
-        int xPosition = position / 4;
-        int yPosition = position % 4;
-        emptySquares.RemoveAt(randomPosition);
-
-        matrix[xPosition, yPosition] = newNumber;
-
-        numberGenerator.Invoke(newNumber, xPosition * 4 + yPosition);
+        GenerateNewNumber();
+        GenerateNewNumber();
     }
 
     public bool Move(Direction direction)
@@ -88,6 +72,25 @@ public class TwentyFortyeight
             GenerateNewNumber();
         }
         return CheckGameOver();
+    }
+    private void GenerateNewNumber()
+    {
+        int twoOrFour = random.Next(0, 10);
+        int newNumber = 4;
+        //90% => 2, 10% => 4
+        if (twoOrFour > 0)
+        {
+            newNumber = 2;
+        }
+        int randomPosition = random.Next(0, emptySquares.Count);
+        int position = emptySquares[randomPosition];
+        int xPosition = position / 4;
+        int yPosition = position % 4;
+        emptySquares.RemoveAt(randomPosition);
+
+        matrix[xPosition, yPosition] = newNumber;
+
+        numberGenerator.Invoke(newNumber, xPosition * 4 + yPosition);
     }
 
     private bool MergeHorizontally(bool reverse)
