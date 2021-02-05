@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 public static class Controller
 {
@@ -6,12 +7,12 @@ public static class Controller
 
     public static int Score => game.Score;
 
-    public static void Restart()
+    public static void SetListeners(UnityAction<int, int> move, UnityAction<int, int> merge, UnityAction<int, int> generate)
     {
         game = new TwentyFortyeight();
-        game.AddMergeNumberListener((int first, int second) => Debug.Log(string.Format("Merge {0} into {1}", first, second)));
-        game.AddMoveNumberListener((int first, int second) => Debug.Log(string.Format("Move {0} into {1}", first, second)));
-        game.AddNumberGeneratorListener((int first, int second) => Debug.Log(string.Format("Generate {0} on {1}", first, second)));
+        game.AddMoveNumberListener(move);
+        game.AddMergeNumberListener(merge);
+        game.AddNumberGeneratorListener(generate);
         game.StartingNumbers();
     }
 

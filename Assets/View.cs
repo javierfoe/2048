@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class View : MonoBehaviour
 {
-    private Text[] squares;
+    private Tile[] squares;
 #if UNITY_ANDROID
     private Vector3 fp;   //First touch position
     private Vector3 lp;   //Last touch position
@@ -16,13 +15,30 @@ public class View : MonoBehaviour
         Controller.Slide(direction);
     }
 
+    private void GenerateNumber(int value, int position)
+    {
+        squares[position].Value = value;
+    }
+
+    private void MoveNumber(int origin, int destination)
+    {
+        squares[destination].Value = squares[origin].Value;
+        squares[origin].Empty();
+    }
+
+    private void MergeNumber(int origin, int destination)
+    {
+        squares[destination].Double();
+        squares[origin].Empty();
+    }
+
     private void Start()
     {
-        squares = GetComponentsInChildren<Text>();
+        squares = GetComponentsInChildren<Tile>();
 #if UNITY_ANDROID
         dragDistance = Screen.width * 10 / 100;
 #endif
-        Controller.Restart();
+        Controller.SetListeners(MoveNumber, MergeNumber, GenerateNumber);
     }
 
     private void Update()
