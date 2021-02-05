@@ -18,6 +18,7 @@ public class View : MonoBehaviour
     private void GenerateNumber(int value, int position)
     {
         squares[position].Value = value;
+        squares[position].AnimateNumberGenerated();
     }
 
     private void MoveNumber(int origin, int destination)

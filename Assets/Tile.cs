@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class Tile : MonoBehaviour
 {
+    private const float generationTime = 0.1f;
+
     public int Value { get { return value; } set { SetValue(value); } }
 
     private Text text;
@@ -17,6 +20,24 @@ public class Tile : MonoBehaviour
     public void Double()
     {
         Value *= 2;
+    }
+
+    public void AnimateNumberGenerated()
+    {
+        StartCoroutine(NumberGenerated());
+    }
+
+    private IEnumerator NumberGenerated()
+    {
+        float time = 0;
+        Vector3 initialScale = new Vector3(0.1f, 0.1f, 0.1f);
+        while(time < generationTime)
+        {
+            transform.localScale = Vector3.Lerp(initialScale, Vector3.one, time / generationTime);
+            yield return null;
+            time += Time.deltaTime;
+        }
+        transform.localScale = Vector3.one;
     }
 
     private void SetValue(int value)

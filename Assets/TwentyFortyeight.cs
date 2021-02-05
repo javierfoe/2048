@@ -106,7 +106,7 @@ public class TwentyFortyeight
             for (int j = start; j < 4 && j > -1 && freeSpot < 4 && freeSpot > -1; j += interval)
             {
                 if (matrix[i, j] == 0) continue;
-                movement = Merge(i, j, interval, ref freeSpot, false, movement);
+                movement = MergeHorizontal(i, j, interval, ref freeSpot, movement);
             }
         }
         return movement;
@@ -125,45 +125,31 @@ public class TwentyFortyeight
             for (int i = start; i < 4 && i > -1 && freeSpot < 4 && freeSpot > -1; i += interval)
             {
                 if (matrix[i, j] == 0) continue;
-                movement = Merge(i, j, interval, ref freeSpot, true, movement);
+                movement = MergeVertical(i, j, interval, ref freeSpot, movement);
             }
         }
         return movement;
     }
 
-    private bool Merge(int i, int j, int interval, ref int freeSpot, bool vertical, bool movement)
+    private bool MergeHorizontal(int i, int j, int interval, ref int freeSpot, bool movement)
     {
         bool newMovement = false;
-        int destination = vertical ? freeSpot * 4 + j : i * 4 + freeSpot;
+        int destination = i * 4 + freeSpot;
         int origin = i * 4 + j;
         //Empty square to move to
-        if (vertical && matrix[freeSpot, j] == 0 || !vertical && matrix[i, freeSpot] == 0)
+        if (matrix[i, freeSpot] == 0)
         {
             //Move the value
-            if (vertical)
-            {
-                RemoveFreeSpace(freeSpot, j, matrix[i, j]);
-            }
-            else
-            {
-                RemoveFreeSpace(i, freeSpot, matrix[i, j]);
-            }
+            RemoveFreeSpace(i, freeSpot, matrix[i, j]);
             AddFreeSpace(i, j);
             newMovement = true;
             moveNumber.Invoke(origin, destination);
         }
         //Merging
-        else if (vertical && matrix[i, j] == matrix[freeSpot, j] && i != freeSpot || !vertical && matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
+        else if (matrix[i, j] == matrix[i, freeSpot] && j != freeSpot)
         {
-            int merge = 2 * (vertical ? matrix[freeSpot, j] : matrix[i, freeSpot]);
-            if (vertical)
-            {
-                matrix[freeSpot, j] = merge;
-            }
-            else
-            {
-                matrix[i, freeSpot] = merge;
-            }
+            int merge = 2 * matrix[i, freeSpot];
+            matrix[i, freeSpot] = merge;
             Score += merge;
             freeSpot += interval;
             AddFreeSpace(i, j);
@@ -171,22 +157,61 @@ public class TwentyFortyeight
             mergeNumber.Invoke(origin, destination);
         }
         //Slide the value to the next empty cell
-        else if (vertical && matrix[i, j] != matrix[freeSpot, j] || !vertical && matrix[i, j] != matrix[i, freeSpot])
+        else if (matrix[i, j] != matrix[i, freeSpot])
         {
             freeSpot += interval;
-            if (vertical && freeSpot != i)
-            {
-                RemoveFreeSpace(freeSpot, j, matrix[i, j]);
-                newMovement = true;
-            }
-            else if (!vertical && freeSpot != j)
+            if (freeSpot != j)
             {
                 RemoveFreeSpace(i, freeSpot, matrix[i, j]);
                 newMovement = true;
             }
             if (newMovement)
             {
-                destination += interval * (vertical ? 4 : 1);
+                destination += interval;
+                moveNumber.Invoke(origin, destination);
+                AddFreeSpace(i, j);
+            }
+        }
+        return newMovement || movement;
+    }
+
+    private bool MergeVertical(int i, int j, int interval, ref int freeSpot, bool movement)
+    {
+        bool newMovement = false;
+        int destination = freeSpot * 4 + j;
+        int origin = i * 4 + j;
+        //Empty square to move to
+        if (matrix[freeSpot, j] == 0)
+        {
+            //Move the value
+            RemoveFreeSpace(freeSpot, j, matrix[i, j]);
+            AddFreeSpace(i, j);
+            newMovement = true;
+            moveNumber.Invoke(origin, destination);
+        }
+        //Merging
+        else if (matrix[i, j] == matrix[freeSpot, j] && i != freeSpot)
+        {
+            int merge = 2 * matrix[freeSpot, j];
+            matrix[freeSpot, j] = merge;
+            Score += merge;
+            freeSpot += interval;
+            AddFreeSpace(i, j);
+            newMovement = true;
+            mergeNumber.Invoke(origin, destination);
+        }
+        //Slide the value to the next empty cell
+        else if (matrix[i, j] != matrix[freeSpot, j])
+        {
+            freeSpot += interval;
+            if (freeSpot != i)
+            {
+                RemoveFreeSpace(freeSpot, j, matrix[i, j]);
+                newMovement = true;
+            }
+            if (newMovement)
+            {
+                destination += interval * 4;
                 moveNumber.Invoke(origin, destination);
                 AddFreeSpace(i, j);
             }
