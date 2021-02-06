@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class View : MonoBehaviour
 {
+    public static bool OnGoingAnimation = false;
+    private const float AnimationTime = 0.1f;
+
     private Tile[] squares;
 #if UNITY_ANDROID
     private Vector3 fp;   //First touch position
@@ -17,20 +21,43 @@ public class View : MonoBehaviour
 
     private void GenerateNumber(int value, int position)
     {
+        OnGoingAnimation = true;
         squares[position].Value = value;
-        squares[position].AnimateNumberGenerated();
+        squares[position].AnimateNumberGenerated(AnimationTime);
     }
 
     private void MoveNumber(int origin, int destination)
     {
-        squares[destination].Value = squares[origin].Value;
-        squares[origin].Empty();
+        OnGoingAnimation = true;
+        StartCoroutine(MoveAnimation(origin, destination));
     }
 
     private void MergeNumber(int origin, int destination)
     {
-        squares[destination].Double();
-        squares[origin].Empty();
+        OnGoingAnimation = true;
+        StartCoroutine(MoveAnimation(origin, destination, 0.8f));
+    }
+
+    private IEnumerator MoveAnimation(int origin, int destination, float moveTimePercentage = 1f)
+    {
+        int oldValue = squares[origin].Value;
+        int originX = origin / 4;
+        int originY = origin % 4;
+        int destinationX = destination / 4;
+        int destinationY = destination % 4;
+        if (moveTimePercentage < 1)
+        {
+            StartCoroutine(squares[destination].MergeAnimation(AnimationTime, moveTimePercentage));
+        }
+        if (originX == destinationX)
+        {
+            yield return squares[origin].MoveHorizontally(destinationY - originY, AnimationTime);
+        }
+        else if (originY == destinationY)
+        {
+            yield return squares[origin].MoveVertically(destinationX - originX, AnimationTime);
+        }
+        squares[destination].Value = oldValue;
     }
 
     private void Start()
@@ -44,6 +71,7 @@ public class View : MonoBehaviour
 
     private void Update()
     {
+        if (OnGoingAnimation) return;
 #if !UNITY_ANDROID
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
